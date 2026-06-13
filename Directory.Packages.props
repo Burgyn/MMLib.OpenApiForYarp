@@ -2,7 +2,10 @@
 
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+    <!-- Transitive pinning is intentionally OFF: the sample downstream services use
+         Microsoft.AspNetCore.OpenApi (a different Microsoft.OpenApi line) and run as separate
+         processes, so each project resolves its own transitive graph. -->
+    <CentralPackageTransitivePinningEnabled>false</CentralPackageTransitivePinningEnabled>
   </PropertyGroup>
 
   <!-- Core runtime dependencies -->
@@ -16,6 +19,11 @@
   <ItemGroup>
     <PackageVersion Include="Scalar.AspNetCore" Version="2.16.3" />
     <PackageVersion Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.6" />
+  </ItemGroup>
+
+  <!-- Sample downstream services -->
+  <ItemGroup>
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
   </ItemGroup>
 
   <!-- Sample (Aspire) -->
