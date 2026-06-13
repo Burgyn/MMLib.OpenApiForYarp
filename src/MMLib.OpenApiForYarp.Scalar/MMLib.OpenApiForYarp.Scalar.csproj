@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>MMLib.OpenApiForYarp.Scalar</PackageId>
+    <Title>MMLib.OpenApiForYarp.Scalar</Title>
+    <Description>Scalar API reference UI adapter for MMLib.OpenApiForYarp. Registers every downstream cluster document as a separate Scalar document.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Scalar.AspNetCore" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MMLib.OpenApiForYarp\MMLib.OpenApiForYarp.csproj" />
+  </ItemGroup>
+
+</Project>

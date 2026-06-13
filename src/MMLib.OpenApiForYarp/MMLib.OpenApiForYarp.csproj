@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <IsPackable>true</IsPackable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>MMLib.OpenApiForYarp</PackageId>
+    <Title>MMLib.OpenApiForYarp</Title>
+    <Description>Aggregates OpenAPI documentation from downstream microservices onto a YARP reverse-proxy gateway. The modern successor to MMLib.SwaggerForOcelot — built for YARP, Scalar, and Microsoft.OpenApi.</Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Yarp.ReverseProxy" />
+    <PackageReference Include="Microsoft.OpenApi" />
+    <PackageReference Include="Microsoft.Extensions.ServiceDiscovery" />
+  </ItemGroup>
+
+</Project>
