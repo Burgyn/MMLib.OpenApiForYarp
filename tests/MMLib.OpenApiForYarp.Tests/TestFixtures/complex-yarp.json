@@ -1,0 +1,34 @@
+{
+  "ReverseProxy": {
+    "Routes": {
+      "pets-route": {
+        "ClusterId": "pets-cluster",
+        "Match": { "Path": "/api/pets/{**catch-all}" },
+        "Transforms": [
+          { "PathPattern": "/pets/{**catch-all}" },
+          { "RequestHeader": "X-Gateway", "Set": "yarp" }
+        ]
+      },
+      "orders-route": {
+        "ClusterId": "orders-cluster",
+        "Match": { "Path": "/api/orders/{**catch-all}" },
+        "Transforms": [
+          { "PathPattern": "/orders/{**catch-all}" },
+          { "QueryValueParameter": "source", "Append": "gateway" }
+        ]
+      },
+      "legacy-route": {
+        "ClusterId": "legacy-cluster",
+        "Match": { "Path": "/legacy/{**catch-all}" },
+        "Transforms": [
+          { "PathRemovePrefix": "/legacy" }
+        ]
+      }
+    },
+    "Clusters": {
+      "pets-cluster": { "Destinations": { "default": { "Address": "https://localhost:5101" } } },
+      "orders-cluster": { "Destinations": { "default": { "Address": "https://localhost:5102" } } },
+      "legacy-cluster": { "Destinations": { "default": { "Address": "https://localhost:5103" } } }
+    }
+  }
+}

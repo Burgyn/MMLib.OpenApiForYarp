@@ -1,0 +1,48 @@
+{
+  "openapi": "3.0.1",
+  "info": { "title": "Orders Service", "version": "2.1.0" },
+  "paths": {
+    "/orders": {
+      "get": {
+        "operationId": "listOrders",
+        "parameters": [
+          { "name": "status", "in": "query", "required": false, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/orders/{orderId}": {
+      "get": {
+        "operationId": "getOrder",
+        "parameters": [
+          { "name": "orderId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/orders/{orderId}/items/{itemId}": {
+      "get": {
+        "operationId": "getOrderItem",
+        "parameters": [
+          { "name": "orderId", "in": "path", "required": true, "schema": { "type": "string" } },
+          { "name": "itemId", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": { "200": { "description": "OK" } }
+      }
+    },
+    "/internal/metrics": {
+      "get": { "operationId": "internalMetrics", "responses": { "200": { "description": "OK" } } }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Order": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "total": { "type": "number", "format": "double" }
+        }
+      }
+    }
+  }
+}
