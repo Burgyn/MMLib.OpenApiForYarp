@@ -79,7 +79,7 @@ app.Run();
 }
 ```
 
-Browse to **`/scalar`** — each downstream service appears as its own tab, with paths shown exactly as a client calls them through the gateway.
+`AddOpenApiForYarp()` binds the `YarpOpenApi` section above — no extra wiring needed (you can also configure it [in code](#configuration)). Browse to **`/scalar`** — each downstream service appears as its own tab, with paths shown exactly as a client calls them through the gateway.
 
 ## How path rewriting works
 
@@ -94,9 +94,48 @@ Supported path transforms: `PathPattern`, `PathPrefix`, `PathRemovePrefix`, `Pat
 
 > \* Unlike `yarp-swagger`, the common YARP path transforms are applied **out of the box** — you don't need to hand-write a transform factory for each route.
 
+## Configuration
+
+There are two ways to configure the library (you can mix them):
+
+**1. Configuration section.** `AddOpenApiForYarp()` automatically binds the **`YarpOpenApi`** section
+(from `appsettings.json`, environment variables, or any configuration source) — it sits alongside
+YARP's own `ReverseProxy` section, as shown in the [quick start](#quick-start). This is the
+recommended approach.
+
+**2. In code.** Pass a delegate to configure (or override the bound values) programmatically — no
+`YarpOpenApi` section required:
+
+```csharp
+builder.Services
+    .AddReverseProxy()
+    .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"))
+    .AddOpenApiForYarp(options =>
+    {
+        options.MergeDocuments = true;
+        options.CacheDuration = TimeSpan.FromSeconds(30);
+        options.MergedDocument.Title = "My Gateway";
+        options.MergedDocument.RenameDuplicateSchemas = true;
+
+        options.Clusters["products-cluster"] = new YarpOpenApiClusterOptions
+        {
+            Title = "Products API",
+            OpenApiPath = "/openapi/v1.json",
+        };
+        options.Clusters["orders-cluster"] = new YarpOpenApiClusterOptions
+        {
+            Title = "Orders API",
+            AddOnlyPublishedPaths = true,
+            ExcludePaths = ["^/api/orders/internal"],
+        };
+    });
+```
+
+The delegate runs after the `YarpOpenApi` section is bound, so it overrides anything from configuration.
+
 ## Configuration reference
 
-The `YarpOpenApi` section sits alongside YARP's own `ReverseProxy` section.
+The `YarpOpenApi` section (and the `YarpOpenApiOptions` object passed to the code delegate) supports:
 
 ### Root options
 
