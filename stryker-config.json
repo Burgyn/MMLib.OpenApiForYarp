@@ -1,0 +1,13 @@
+{
+  "stryker-config": {
+    "project": "MMLib.OpenApiForYarp.csproj",
+    "test-projects": [
+      "tests/MMLib.OpenApiForYarp.Tests/MMLib.OpenApiForYarp.Tests.csproj",
+      "tests/MMLib.OpenApiForYarp.IntegrationTests/MMLib.OpenApiForYarp.IntegrationTests.csproj"
+    ],
+    "target-framework": "net10.0",
+    "reporters": [ "html", "progress", "cleartext" ],
+    "mutation-level": "Standard",
+    "thresholds": { "high": 85, "low": 70, "break": 0 }
+  }
+}

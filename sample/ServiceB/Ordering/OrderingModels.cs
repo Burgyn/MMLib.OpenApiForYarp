@@ -73,3 +73,12 @@ public readonly record struct OrderQuery(
     OrderStatus? Status,
     Guid? CustomerId,
     string? Sort);
+
+/// <summary>Request body to attach a free-text note to an order.</summary>
+public sealed record AddNoteRequest
+{
+    /// <summary>The note text to record against the order.</summary>
+    [Required]
+    [StringLength(500)]
+    public string Text { get; init; } = string.Empty;
+}

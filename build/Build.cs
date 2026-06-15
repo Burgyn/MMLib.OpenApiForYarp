@@ -108,6 +108,15 @@ class Build : NukeBuild
                     .EnableSkipDuplicate()));
         });
 
+    Target MutationTest => _ => _
+        .Description("Run Stryker.NET mutation testing on the core library")
+        .DependsOn(Compile)
+        .Executes(() =>
+        {
+            DotNet("tool restore", RootDirectory);
+            DotNet("stryker", RootDirectory);
+        });
+
     // Returns true when the given version is already published on the NuGet flat-container index,
     // so the publish step becomes a no-op until the version in Directory.Build.props is bumped.
     static async System.Threading.Tasks.Task<bool> VersionExistsOnNuGet(string id, string version)

@@ -12,7 +12,7 @@ public class PathRewriteTransformerTests
         var route = FakeYarp.Route("products", "c", "/api/products/{**catch-all}", ("PathPattern", "/products/{**catch-all}"));
         var context = TestContexts.ForCluster(doc, TestServices.Empty, routes: [route]);
 
-        await transformer.TransformAsync(doc, context, TestContext.Current.CancellationToken);
+        await transformer.TransformAsync(doc, context, CancellationToken.None);
 
         doc.Paths.ShouldContainKey("/api/products/{id}");
         doc.Paths.ShouldNotContainKey("/products/{id}");

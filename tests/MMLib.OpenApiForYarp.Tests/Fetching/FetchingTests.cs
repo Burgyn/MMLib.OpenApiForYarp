@@ -11,7 +11,7 @@ public class DestinationResolverTests
     public async Task Static_Returns_Address_Verbatim()
     {
         var resolver = new StaticDestinationResolver();
-        (await resolver.ResolveAsync("https://localhost:5101", TestContext.Current.CancellationToken))
+        (await resolver.ResolveAsync("https://localhost:5101", CancellationToken.None))
             .ShouldBe("https://localhost:5101");
     }
 
@@ -48,7 +48,7 @@ public class DownstreamOpenApiClientTests
     {
         var client = Create(StubHttpMessageHandler.Json(Json));
 
-        OpenApiDocument? doc = await client.FetchAsync("products", "https://localhost:5101", "/openapi/v1.json", TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        OpenApiDocument? doc = await client.FetchAsync("products", "https://localhost:5101", "/openapi/v1.json", TimeSpan.FromSeconds(5), CancellationToken.None);
 
         doc.ShouldNotBeNull();
         doc!.Info!.Title.ShouldBe("Products API");
@@ -59,7 +59,7 @@ public class DownstreamOpenApiClientTests
     {
         var client = Create(StubHttpMessageHandler.Status(HttpStatusCode.InternalServerError));
 
-        OpenApiDocument? doc = await client.FetchAsync("products", "https://localhost:5101", "/openapi/v1.json", TimeSpan.FromSeconds(5), TestContext.Current.CancellationToken);
+        OpenApiDocument? doc = await client.FetchAsync("products", "https://localhost:5101", "/openapi/v1.json", TimeSpan.FromSeconds(5), CancellationToken.None);
 
         doc.ShouldBeNull();
     }

@@ -69,8 +69,8 @@ public class ClusterDocumentBuilderTests
         var client = new FakeDownstreamClient(() => TestDocuments.WithPaths("/products"));
         var builder = Create(client);
 
-        await builder.BuildAsync("products-cluster", TestContext.Current.CancellationToken);
-        await builder.BuildAsync("products-cluster", TestContext.Current.CancellationToken);
+        await builder.BuildAsync("products-cluster", CancellationToken.None);
+        await builder.BuildAsync("products-cluster", CancellationToken.None);
 
         client.Calls.ShouldBe(1);
     }
@@ -81,7 +81,7 @@ public class ClusterDocumentBuilderTests
         var client = new FakeDownstreamClient(() => TestDocuments.WithPaths("/products/{id}"));
         var builder = Create(client, documentTransformers: [typeof(PathRewriteTransformer)]);
 
-        OpenApiDocument? doc = await builder.BuildAsync("products-cluster", TestContext.Current.CancellationToken);
+        OpenApiDocument? doc = await builder.BuildAsync("products-cluster", CancellationToken.None);
 
         doc.ShouldNotBeNull();
         doc!.Paths.ShouldContainKey("/api/products/{id}");
@@ -93,7 +93,7 @@ public class ClusterDocumentBuilderTests
         var client = new FakeDownstreamClient(() => TestDocuments.WithPaths("/products"));
         var builder = Create(client, clusterOptions: new YarpOpenApiClusterOptions { Title = "Products API" });
 
-        OpenApiDocument? doc = await builder.BuildAsync("products-cluster", TestContext.Current.CancellationToken);
+        OpenApiDocument? doc = await builder.BuildAsync("products-cluster", CancellationToken.None);
 
         doc!.Info!.Title.ShouldBe("Products API");
     }
@@ -103,6 +103,6 @@ public class ClusterDocumentBuilderTests
     {
         var builder = Create(new FakeDownstreamClient(() => TestDocuments.WithPaths("/x")));
 
-        (await builder.BuildAsync("missing", TestContext.Current.CancellationToken)).ShouldBeNull();
+        (await builder.BuildAsync("missing", CancellationToken.None)).ShouldBeNull();
     }
 }

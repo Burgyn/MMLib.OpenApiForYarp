@@ -62,7 +62,11 @@ internal static class CatalogApi
 
         RouteGroupBuilder products = app.MapGroup("/products").WithTags("Products");
 
-        products.MapGet("/", ([AsParameters] ProductQuery query) =>
+        products.MapGet("/", (
+                [AsParameters] ProductQuery query,
+                [FromHeader(Name = "X-Tenant-Id")] string? tenantId,
+                [FromQuery] string[]? tags,
+                [FromQuery] Guid[]? ids) =>
             {
                 IEnumerable<Product> result = store.All;
 
@@ -81,6 +85,16 @@ internal static class CatalogApi
                     result = result.Where(p => p.Availability == availability);
                 }
 
+                if (tags is { Length: > 0 })
+                {
+                    result = result.Where(p => tags.Any(t => p.Tags.Contains(t, StringComparer.OrdinalIgnoreCase)));
+                }
+
+                if (ids is { Length: > 0 })
+                {
+                    result = result.Where(p => ids.Contains(p.Id));
+                }
+
                 result = query.Sort?.ToLowerInvariant() switch
                 {
                     "price" => result.OrderBy(p => p.Price),
@@ -93,7 +107,7 @@ internal static class CatalogApi
             })
             .WithName("ListProducts")
             .WithSummary("List products")
-            .WithDescription("Returns a paged list of products with optional search, category, availability filters and sorting.");
+            .WithDescription("Returns a paged list of products with optional search, category, availability, tag and id filters and sorting. Supports multi-tenancy via the X-Tenant-Id header.");
 
         products.MapGet("/{id:guid}", Results<Ok<Product>, NotFound<ProblemDetails>> (Guid id) =>
                 store.Get(id) is { } product
@@ -118,7 +132,70 @@ internal static class CatalogApi
             .WithName("CreateProduct")
             .WithSummary("Create a product");
 
-        products.MapPut("/{id:guid}", Results<Ok<Product>, NotFound<ProblemDetails>, ValidationProblem> (Guid id, UpdateProductRequest request) =>
+        products.MapPost("/bulk", Results<Created<IReadOnlyList<Product>>, ValidationProblem> (IReadOnlyList<CreateProductRequest> requests) =>
+            {
+                var errors = new Dictionary<string, string[]>();
+                for (int i = 0; i < requests.Count; i++)
+                {
+                    if (!Validation.TryValidate(requests[i], out var itemErrors))
+                    {
+                        foreach ((string member, string[] messages) in itemErrors)
+                        {
+                            errors[$"[{i}].{member}"] = messages;
+                        }
+                    }
+                }
+
+                if (errors.Count > 0)
+                {
+                    return TypedResults.ValidationProblem(errors);
+                }
+
+                IReadOnlyList<Product> created =
+                [
+                    .. requests.Select(request => store.Add(new Product(
+                        Guid.NewGuid(), request.Name, request.Description, request.Price, request.Currency,
+                        request.Category, ProductAvailability.InStock, request.Tags ?? [], 0, DateTimeOffset.UtcNow))),
+                ];
+
+                return TypedResults.Created("/products", created);
+            })
+            .WithName("CreateProductsBulk")
+            .WithSummary("Bulk-create products")
+            .WithDescription("Accepts a JSON array of products and creates them all, validating each item.");
+
+        products.MapPost("/{id:guid}/image", Results<Ok<object>, NotFound<ProblemDetails>> (Guid id, IFormFile file) =>
+                store.Get(id) is { } product
+                    ? TypedResults.Ok<object>(new
+                    {
+                        productId = product.Id,
+                        fileName = file.FileName,
+                        size = file.Length,
+                        contentType = file.ContentType,
+                    })
+                    : TypedResults.NotFound(Problems.NotFound("Product", id)))
+            .WithName("UploadProductImage")
+            .WithSummary("Upload a product image")
+            .WithDescription("Accepts a multipart/form-data file upload and echoes the stored file's name and size.")
+            .DisableAntiforgery();
+
+        products.MapGet("/stats", () =>
+            {
+                var byCategory = store.All
+                    .GroupBy(p => p.Category, StringComparer.OrdinalIgnoreCase)
+                    .OrderBy(g => g.Key)
+                    .ToDictionary(g => g.Key, g => g.Count());
+
+                return TypedResults.Ok(new { total = store.All.Count(), byCategory });
+            })
+            .WithName("GetProductStats")
+            .WithSummary("Get catalog statistics")
+            .WithDescription("Returns an inline summary with the total product count and a per-category breakdown.");
+
+        products.MapPut("/{id:guid}", Results<Ok<Product>, NotFound<ProblemDetails>, ValidationProblem> (
+                Guid id,
+                UpdateProductRequest request,
+                [FromHeader(Name = "If-Match")] string? ifMatch) =>
             {
                 if (!Validation.TryValidate(request, out var errors))
                 {

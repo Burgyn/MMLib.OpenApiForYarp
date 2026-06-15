@@ -34,7 +34,7 @@ public class ServiceDiscoveryResolutionTests
             ["Services:products-service:http:0"] = "http://localhost:5101",
         });
 
-        string resolved = await resolver.ResolveAsync("http://products-service", TestContext.Current.CancellationToken);
+        string resolved = await resolver.ResolveAsync("http://products-service", CancellationToken.None);
 
         resolved.ShouldBe("http://localhost:5101");
     }

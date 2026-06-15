@@ -85,7 +85,10 @@ internal static class CustomerApi
 
         RouteGroupBuilder customers = app.MapGroup("/customers").WithTags("Customers");
 
-        customers.MapGet("/", ([AsParameters] CustomerQuery query) =>
+        customers.MapGet("/", (
+                [AsParameters] CustomerQuery query,
+                [FromHeader(Name = "X-Tenant-Id")] string? tenantId,
+                [FromQuery] LoyaltyTier[]? tiers) =>
             {
                 IEnumerable<Customer> result = store.All;
 
@@ -101,6 +104,11 @@ internal static class CustomerApi
                     result = result.Where(c => c.Tier == tier);
                 }
 
+                if (tiers is { Length: > 0 })
+                {
+                    result = result.Where(c => tiers.Contains(c.Tier));
+                }
+
                 result = query.Sort?.ToLowerInvariant() switch
                 {
                     "createdat" => result.OrderBy(c => c.CreatedAt),
@@ -112,7 +120,7 @@ internal static class CustomerApi
             })
             .WithName("ListCustomers")
             .WithSummary("List customers")
-            .WithDescription("Returns a paged list of customers with optional search (name/email), loyalty tier filter and sorting.");
+            .WithDescription("Returns a paged list of customers with optional search (name/email), single- and multi-tier loyalty filters and sorting. Supports multi-tenancy via the X-Tenant-Id header.");
 
         customers.MapGet("/{id:guid}", Results<Ok<Customer>, NotFound<ProblemDetails>> (Guid id) =>
                 store.Get(id) is { } customer

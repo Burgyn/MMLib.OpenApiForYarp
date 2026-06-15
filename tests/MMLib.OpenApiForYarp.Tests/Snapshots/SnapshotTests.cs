@@ -21,7 +21,7 @@ public class SnapshotTests
         var route = FakeYarp.Route("pets", "pets-cluster", "/api/pets/{**catch-all}", ("PathPattern", "/pets/{**catch-all}"));
 
         new YarpPathRewriter().RewriteDocumentPaths(doc, [route]);
-        string json = await OpenApiSerializer.SerializeAsync(doc, OpenApiSpecVersion.OpenApi3_0, TestContext.Current.CancellationToken);
+        string json = await OpenApiSerializer.SerializeAsync(doc, OpenApiSpecVersion.OpenApi3_0, CancellationToken.None);
 
         await Verifier.VerifyJson(json).UseDirectory("Snapshots");
     }
@@ -34,9 +34,9 @@ public class SnapshotTests
         var options = new YarpOpenApiClusterOptions { AddOnlyPublishedPaths = true };
         var context = TestContexts.ForCluster(doc, TestServices.Empty, options: options, routes: [route]);
 
-        await new PathRewriteTransformer().TransformAsync(doc, context, TestContext.Current.CancellationToken);
-        await new PublishedPathsFilterTransformer().TransformAsync(doc, context, TestContext.Current.CancellationToken);
-        string json = await OpenApiSerializer.SerializeAsync(doc, OpenApiSpecVersion.OpenApi3_0, TestContext.Current.CancellationToken);
+        await new PathRewriteTransformer().TransformAsync(doc, context, CancellationToken.None);
+        await new PublishedPathsFilterTransformer().TransformAsync(doc, context, CancellationToken.None);
+        string json = await OpenApiSerializer.SerializeAsync(doc, OpenApiSpecVersion.OpenApi3_0, CancellationToken.None);
 
         await Verifier.VerifyJson(json).UseDirectory("Snapshots");
     }
@@ -54,7 +54,18 @@ public class SnapshotTests
 
         OpenApiDocument merged = new OpenApiDocumentMerger(NullLogger<OpenApiDocumentMerger>.Instance)
             .Merge([("pets", pets), ("auth", auth)], new MergedDocumentOptions { Title = "Gateway API", Version = "1.0.0" });
-        string json = await OpenApiSerializer.SerializeAsync(merged, OpenApiSpecVersion.OpenApi3_0, TestContext.Current.CancellationToken);
+        string json = await OpenApiSerializer.SerializeAsync(merged, OpenApiSpecVersion.OpenApi3_0, CancellationToken.None);
+
+        await Verifier.VerifyJson(json).UseDirectory("Snapshots");
+    }
+
+    [Fact]
+    public async Task RichApi_WithPrefix()
+    {
+        OpenApiDocument doc = FixtureLoader.Load("rich-api.openapi.json");
+        new YarpPathRewriter().RewriteDocumentPaths(doc,
+            [FakeYarp.Route("catalog", "catalog-cluster", "/api/catalog/{**catch-all}", ("PathPattern", "/{**catch-all}"))]);
+        string json = await OpenApiSerializer.SerializeAsync(doc, OpenApiSpecVersion.OpenApi3_0, CancellationToken.None);
 
         await Verifier.VerifyJson(json).UseDirectory("Snapshots");
     }

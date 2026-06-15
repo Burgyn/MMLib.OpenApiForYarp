@@ -13,7 +13,7 @@ public class SecurityPropagationTests
         var doc = TestDocuments.WithPaths("/products").WithSecuritySchemes("Bearer");
         var context = TestContexts.ForCluster(doc, TestServices.Empty);
 
-        await _transformer.TransformAsync(doc, context, TestContext.Current.CancellationToken);
+        await _transformer.TransformAsync(doc, context, CancellationToken.None);
 
         doc.Components!.SecuritySchemes!.ShouldContainKey("Bearer");
     }
@@ -25,7 +25,7 @@ public class SecurityPropagationTests
         var options = new YarpOpenApiClusterOptions { SecurityScheme = "Bearer" };
         var context = TestContexts.ForCluster(doc, TestServices.Empty, options: options);
 
-        await _transformer.TransformAsync(doc, context, TestContext.Current.CancellationToken);
+        await _transformer.TransformAsync(doc, context, CancellationToken.None);
 
         doc.Components!.SecuritySchemes!.Keys.ShouldBe(["Bearer"]);
     }
@@ -36,7 +36,7 @@ public class SecurityPropagationTests
         var doc = TestDocuments.WithPaths("/products");
         var context = TestContexts.ForCluster(doc, TestServices.Empty);
 
-        await _transformer.TransformAsync(doc, context, TestContext.Current.CancellationToken);
+        await _transformer.TransformAsync(doc, context, CancellationToken.None);
 
         (doc.Components?.SecuritySchemes is null || doc.Components.SecuritySchemes.Count == 0).ShouldBeTrue();
     }

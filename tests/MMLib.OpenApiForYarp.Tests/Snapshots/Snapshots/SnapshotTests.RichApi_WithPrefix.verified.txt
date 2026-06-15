@@ -1,0 +1,553 @@
+﻿{
+  openapi: 3.0.4,
+  info: {
+    title: Rich Catalog Service,
+    description: Exercises a broad range of OpenAPI features.,
+    version: 3.2.0
+  },
+  paths: {
+    /api/catalog/items: {
+      get: {
+        tags: [
+          Items
+        ],
+        operationId: listItems,
+        parameters: [
+          {
+            name: page,
+            in: query,
+            schema: {
+              type: integer,
+              format: int32,
+              default: 1
+            }
+          },
+          {
+            name: pageSize,
+            in: query,
+            schema: {
+              maximum: 100,
+              minimum: 1,
+              type: integer,
+              format: int32
+            }
+          },
+          {
+            name: tags,
+            in: query,
+            schema: {
+              type: array,
+              items: {
+                type: string
+              }
+            }
+          },
+          {
+            name: status,
+            in: query,
+            schema: {
+              enum: [
+                active,
+                archived,
+                draft
+              ],
+              type: string
+            }
+          },
+          {
+            name: minPrice,
+            in: query,
+            schema: {
+              type: number,
+              format: double,
+              nullable: true
+            }
+          },
+          {
+            name: includeDeleted,
+            in: query,
+            schema: {
+              type: boolean,
+              default: false
+            }
+          },
+          {
+            name: X-Tenant-Id,
+            in: header,
+            required: true,
+            schema: {
+              type: string,
+              format: uuid
+            }
+          },
+          {
+            name: Accept-Language,
+            in: header,
+            schema: {
+              type: string
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: A page of items.,
+            headers: {
+              X-Total-Count: {
+                schema: {
+                  type: integer,
+                  format: int32
+                }
+              }
+            },
+            content: {
+              application/json: {
+                schema: {
+                  type: array,
+                  items: {
+                    $ref: #/components/schemas/Item
+                  }
+                }
+              }
+            }
+          },
+          400: {
+            description: Bad request.,
+            content: {
+              application/problem+json: {
+                schema: {
+                  $ref: #/components/schemas/ProblemDetails
+                }
+              }
+            }
+          }
+        }
+      },
+      post: {
+        tags: [
+          Items
+        ],
+        operationId: createItem,
+        requestBody: {
+          content: {
+            application/json: {
+              schema: {
+                $ref: #/components/schemas/CreateItem
+              }
+            }
+          },
+          required: true
+        },
+        responses: {
+          201: {
+            description: Created.,
+            headers: {
+              Location: {
+                schema: {
+                  type: string,
+                  format: uri
+                }
+              }
+            },
+            content: {
+              application/json: {
+                schema: {
+                  $ref: #/components/schemas/Item
+                }
+              }
+            }
+          },
+          409: {
+            description: Conflict.,
+            content: {
+              application/problem+json: {
+                schema: {
+                  $ref: #/components/schemas/ProblemDetails
+                }
+              }
+            }
+          }
+        },
+        security: [
+          {}
+        ]
+      }
+    },
+    /api/catalog/items/{itemId}: {
+      get: {
+        tags: [
+          Items
+        ],
+        operationId: getItem,
+        parameters: [
+          {
+            name: itemId,
+            in: path,
+            required: true,
+            schema: {
+              type: string,
+              format: uuid
+            }
+          },
+          {
+            name: If-None-Match,
+            in: header,
+            schema: {
+              type: string
+            }
+          },
+          {
+            name: session,
+            in: cookie,
+            schema: {
+              type: string
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: The item.,
+            content: {
+              application/json: {
+                schema: {
+                  $ref: #/components/schemas/Item
+                }
+              }
+            }
+          },
+          304: {
+            description: Not modified.
+          },
+          404: {
+            description: Not found.,
+            content: {
+              application/problem+json: {
+                schema: {
+                  $ref: #/components/schemas/ProblemDetails
+                }
+              }
+            }
+          }
+        }
+      },
+      delete: {
+        tags: [
+          Items
+        ],
+        operationId: deleteItem,
+        parameters: [
+          {
+            name: itemId,
+            in: path,
+            required: true,
+            schema: {
+              type: string,
+              format: uuid
+            }
+          }
+        ],
+        responses: {
+          204: {
+            description: Deleted.
+          },
+          404: {
+            description: Not found.
+          }
+        },
+        security: [
+          {}
+        ]
+      }
+    },
+    /api/catalog/items/{itemId}/attachments: {
+      post: {
+        tags: [
+          Attachments
+        ],
+        operationId: uploadAttachment,
+        parameters: [
+          {
+            name: itemId,
+            in: path,
+            required: true,
+            schema: {
+              type: string,
+              format: uuid
+            }
+          }
+        ],
+        requestBody: {
+          content: {
+            multipart/form-data: {
+              schema: {
+                required: [
+                  file
+                ],
+                type: object,
+                properties: {
+                  file: {
+                    type: string,
+                    format: binary
+                  },
+                  caption: {
+                    type: string
+                  }
+                }
+              }
+            }
+          },
+          required: true
+        },
+        responses: {
+          201: {
+            description: Attachment stored (inline response schema, not a named component).,
+            content: {
+              application/json: {
+                schema: {
+                  type: object,
+                  properties: {
+                    id: {
+                      type: string,
+                      format: uuid
+                    },
+                    url: {
+                      type: string,
+                      format: uri
+                    }
+                  }
+                }
+              }
+            }
+          },
+          404: {
+            description: Not found.
+          }
+        },
+        security: [
+          {}
+        ]
+      }
+    },
+    /api/catalog/search: {
+      get: {
+        tags: [
+          Search
+        ],
+        operationId: search,
+        parameters: [
+          {
+            name: q,
+            in: query,
+            required: true,
+            schema: {
+              type: string
+            }
+          },
+          {
+            name: filter,
+            in: query,
+            style: deepObject,
+            explode: true,
+            schema: {
+              type: object,
+              additionalProperties: {
+                type: string
+              }
+            }
+          },
+          {
+            name: sort,
+            in: query,
+            schema: {
+              type: array,
+              items: {
+                type: string
+              }
+            }
+          }
+        ],
+        responses: {
+          200: {
+            description: Search results (inline object composing a referenced component).,
+            content: {
+              application/json: {
+                schema: {
+                  type: object,
+                  properties: {
+                    results: {
+                      type: array,
+                      items: {
+                        $ref: #/components/schemas/Item
+                      }
+                    },
+                    total: {
+                      type: integer,
+                      format: int32
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  components: {
+    schemas: {
+      Money: {
+        required: [
+          amount,
+          currency
+        ],
+        type: object,
+        properties: {
+          amount: {
+            type: number,
+            format: double
+          },
+          currency: {
+            enum: [
+              EUR,
+              USD,
+              GBP
+            ],
+            type: string
+          }
+        }
+      },
+      Supplier: {
+        type: object,
+        properties: {
+          id: {
+            type: string,
+            format: uuid
+          },
+          name: {
+            type: string
+          }
+        }
+      },
+      Item: {
+        required: [
+          id,
+          name,
+          price
+        ],
+        type: object,
+        properties: {
+          id: {
+            type: string,
+            format: uuid
+          },
+          name: {
+            maxLength: 120,
+            minLength: 2,
+            type: string
+          },
+          description: {
+            type: string,
+            nullable: true
+          },
+          price: {
+            $ref: #/components/schemas/Money
+          },
+          tags: {
+            type: array,
+            items: {
+              type: string
+            }
+          },
+          attributes: {
+            type: object,
+            additionalProperties: {
+              type: string
+            }
+          },
+          status: {
+            enum: [
+              active,
+              archived,
+              draft
+            ],
+            type: string
+          },
+          rating: {
+            type: number,
+            format: double,
+            nullable: true
+          },
+          createdAt: {
+            type: string,
+            format: date-time
+          },
+          supplier: {
+            allOf: [
+              {
+                $ref: #/components/schemas/Supplier
+              }
+            ]
+          }
+        }
+      },
+      CreateItem: {
+        required: [
+          name,
+          price
+        ],
+        type: object,
+        properties: {
+          name: {
+            maxLength: 120,
+            minLength: 2,
+            type: string
+          },
+          price: {
+            $ref: #/components/schemas/Money
+          },
+          tags: {
+            type: array,
+            items: {
+              type: string
+            }
+          },
+          attributes: {
+            type: object,
+            additionalProperties: {
+              type: string
+            }
+          }
+        }
+      },
+      ProblemDetails: {
+        type: object,
+        properties: {
+          type: {
+            type: string
+          },
+          title: {
+            type: string
+          },
+          status: {
+            type: integer,
+            format: int32
+          },
+          detail: {
+            type: string
+          }
+        }
+      }
+    },
+    securitySchemes: {
+      Bearer: {
+        type: http,
+        scheme: bearer,
+        bearerFormat: JWT
+      },
+      ApiKey: {
+        type: apiKey,
+        name: X-Api-Key,
+        in: header
+      }
+    }
+  }
+}

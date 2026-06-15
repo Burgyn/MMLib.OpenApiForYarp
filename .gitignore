@@ -490,3 +490,7 @@ $RECYCLE.BIN/
 # NUKE build
 .nuke/temp/
 artifacts/
+
+# Stryker.NET mutation testing output
+StrykerOutput/
+**/StrykerOutput/

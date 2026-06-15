@@ -83,7 +83,7 @@ public class PipelineTests
         });
         var doc = TestDocuments.WithPaths("/x");
 
-        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), TestContext.Current.CancellationToken);
+        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), CancellationToken.None);
 
         log.Entries.ShouldBe(["A", "B", "C"]);
     }
@@ -98,7 +98,7 @@ public class PipelineTests
         });
         var doc = TestDocuments.WithPaths("/x");
 
-        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), TestContext.Current.CancellationToken);
+        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), CancellationToken.None);
 
         log.Entries.ShouldBe(["A", "C"]);
     }
@@ -115,7 +115,7 @@ public class PipelineTests
         });
         var doc = TestDocuments.WithPaths("/x");
 
-        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), TestContext.Current.CancellationToken);
+        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), CancellationToken.None);
 
         log.Entries.ShouldBe(["C"]);
     }
@@ -126,7 +126,7 @@ public class PipelineTests
         var (pipeline, services, _) = Build(r => r.AddDocumentTransformer(typeof(AddPathTransformer)));
         var doc = TestDocuments.WithPaths("/x");
 
-        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), TestContext.Current.CancellationToken);
+        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), CancellationToken.None);
 
         doc.Paths.ShouldContainKey("/added");
     }
@@ -137,7 +137,7 @@ public class PipelineTests
         var (pipeline, services, _) = Build(r => r.AddOperationTransformer(typeof(TagOperationTransformer)));
         var doc = TestDocuments.WithPaths("/products", "/orders");
 
-        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), TestContext.Current.CancellationToken);
+        await pipeline.RunAsync(doc, TestContexts.ForCluster(doc, services), CancellationToken.None);
 
         var products = (OpenApiPathItem)doc.Paths["/products"];
         products.Operations![System.Net.Http.HttpMethod.Get].Description.ShouldBe("tagged");

@@ -19,8 +19,8 @@ public class PublishedPathsFilterTests
         var ordersRoute = FakeYarp.Route("orders", "c", "/api/orders/{**catch-all}", ("PathPattern", "/orders/{**catch-all}"));
         var context = TestContexts.ForCluster(doc, TestServices.Empty, options: options, routes: [productsRoute, ordersRoute]);
 
-        await _rewrite.TransformAsync(doc, context, TestContext.Current.CancellationToken);
-        await _filter.TransformAsync(doc, context, TestContext.Current.CancellationToken);
+        await _rewrite.TransformAsync(doc, context, CancellationToken.None);
+        await _filter.TransformAsync(doc, context, CancellationToken.None);
         return doc;
     }
 

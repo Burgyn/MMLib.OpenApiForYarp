@@ -43,7 +43,7 @@ public class IntegrationScenariosTests
     {
         await using var host = await GatewayTestHost.StartAsync(Fixtures.GatewayConfig(), Fixtures.BothServices());
 
-        OpenApiDocument doc = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", TestContext.Current.CancellationToken);
+        OpenApiDocument doc = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", CancellationToken.None);
 
         doc.Paths.ShouldContainKey("/api/products");
         doc.Paths.ShouldContainKey("/api/products/{id}");
@@ -55,8 +55,8 @@ public class IntegrationScenariosTests
     {
         await using var host = await GatewayTestHost.StartAsync(Fixtures.GatewayConfig(), Fixtures.BothServices());
 
-        OpenApiDocument products = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", TestContext.Current.CancellationToken);
-        OpenApiDocument orders = await GetDocumentAsync(host.Client, "/openapi/orders-cluster.json", TestContext.Current.CancellationToken);
+        OpenApiDocument products = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", CancellationToken.None);
+        OpenApiDocument orders = await GetDocumentAsync(host.Client, "/openapi/orders-cluster.json", CancellationToken.None);
 
         products.Paths.ShouldContainKey("/api/products/{id}");
         orders.Paths.ShouldContainKey("/api/orders/{id}");
@@ -67,7 +67,7 @@ public class IntegrationScenariosTests
     {
         await using var host = await GatewayTestHost.StartAsync(Fixtures.GatewayConfig(mergeDocuments: true), Fixtures.BothServices());
 
-        OpenApiDocument merged = await GetDocumentAsync(host.Client, "/openapi/all.json", TestContext.Current.CancellationToken);
+        OpenApiDocument merged = await GetDocumentAsync(host.Client, "/openapi/all.json", CancellationToken.None);
 
         merged.Info!.Title.ShouldBe("Gateway API");
         merged.Paths.ShouldContainKey("/api/products/{id}");
@@ -79,7 +79,7 @@ public class IntegrationScenariosTests
     {
         await using var host = await GatewayTestHost.StartAsync(Fixtures.GatewayConfig(ordersAddOnlyPublished: true), Fixtures.BothServices());
 
-        OpenApiDocument orders = await GetDocumentAsync(host.Client, "/openapi/orders-cluster.json", TestContext.Current.CancellationToken);
+        OpenApiDocument orders = await GetDocumentAsync(host.Client, "/openapi/orders-cluster.json", CancellationToken.None);
 
         orders.Paths.ShouldContainKey("/api/orders");
         orders.Paths.ShouldContainKey("/api/orders/{id}");
@@ -91,7 +91,7 @@ public class IntegrationScenariosTests
     {
         await using var host = await GatewayTestHost.StartAsync(Fixtures.GatewayConfig(), Fixtures.BothServices());
 
-        OpenApiDocument doc = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", TestContext.Current.CancellationToken);
+        OpenApiDocument doc = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", CancellationToken.None);
 
         doc.Components!.SecuritySchemes!.ShouldContainKey("Bearer");
     }
@@ -101,7 +101,7 @@ public class IntegrationScenariosTests
     {
         await using var host = await GatewayTestHost.StartAsync(Fixtures.GatewayConfig(), Fixtures.BothServices());
 
-        var ct = TestContext.Current.CancellationToken;
+        var ct = CancellationToken.None;
         HttpResponseMessage response = await host.Client.GetAsync("/scalar", ct);
 
         // Scalar redirects "/scalar" -> "/scalar/"; the TestServer client does not auto-follow.
@@ -122,7 +122,7 @@ public class IntegrationScenariosTests
             Fixtures.BothServices(),
             configureOpenApi: b => b.AddDocumentTransformer<AddPathTransformer>());
 
-        OpenApiDocument doc = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", TestContext.Current.CancellationToken);
+        OpenApiDocument doc = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", CancellationToken.None);
 
         doc.Paths.ShouldContainKey("/custom-added");
     }
@@ -140,7 +140,7 @@ public class IntegrationScenariosTests
             Fixtures.BothServices(),
             configureServices: services => services.AddSingleton<IServiceDestinationResolver>(resolver));
 
-        OpenApiDocument doc = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", TestContext.Current.CancellationToken);
+        OpenApiDocument doc = await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", CancellationToken.None);
 
         doc.Paths.ShouldContainKey("/api/products/{id}");
         resolver.Resolved.ShouldContain("https://products-service");
@@ -153,7 +153,7 @@ public class IntegrationScenariosTests
         await using var host = await GatewayTestHost.StartAsync(
             Fixtures.GatewayConfig(cacheDuration: "00:00:00.200"),
             handler);
-        var ct = TestContext.Current.CancellationToken;
+        var ct = CancellationToken.None;
 
         await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", ct);
         await GetDocumentAsync(host.Client, "/openapi/products-cluster.json", ct);

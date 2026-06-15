@@ -101,7 +101,12 @@ internal static class OrderingApi
 
         RouteGroupBuilder orders = app.MapGroup("/orders").WithTags("Orders");
 
-        orders.MapGet("/", ([AsParameters] OrderQuery query) =>
+        orders.MapGet("/", (
+                [AsParameters] OrderQuery query,
+                [FromHeader(Name = "X-Tenant-Id")] string? tenantId,
+                [FromQuery] OrderStatus[]? statuses,
+                [FromQuery] DateTimeOffset? placedAfter,
+                [FromQuery] DateTimeOffset? placedBefore) =>
             {
                 IEnumerable<Order> result = store.All;
 
@@ -110,9 +115,24 @@ internal static class OrderingApi
                     result = result.Where(o => o.Status == status);
                 }
 
+                if (statuses is { Length: > 0 })
+                {
+                    result = result.Where(o => statuses.Contains(o.Status));
+                }
+
                 if (query.CustomerId is { } customerId)
                 {
                     result = result.Where(o => o.CustomerId == customerId);
+                }
+
+                if (placedAfter is { } after)
+                {
+                    result = result.Where(o => o.PlacedAt >= after);
+                }
+
+                if (placedBefore is { } before)
+                {
+                    result = result.Where(o => o.PlacedAt <= before);
                 }
 
                 result = query.Sort?.ToLowerInvariant() switch
@@ -127,7 +147,7 @@ internal static class OrderingApi
             })
             .WithName("ListOrders")
             .WithSummary("List orders")
-            .WithDescription("Returns a paged list of orders with optional status and customer filters and sorting.");
+            .WithDescription("Returns a paged list of orders with optional status, multi-status, customer and placed-date-range filters and sorting. Supports multi-tenancy via the X-Tenant-Id header.");
 
         orders.MapGet("/{id:guid}", Results<Ok<Order>, NotFound<ProblemDetails>> (Guid id) =>
                 store.Get(id) is { } order
@@ -176,6 +196,21 @@ internal static class OrderingApi
             })
             .WithName("CancelOrder")
             .WithSummary("Cancel an order");
+
+        orders.MapPost("/{id:guid}/notes", Results<Ok<object>, NotFound<ProblemDetails>, ValidationProblem> (Guid id, AddNoteRequest request) =>
+            {
+                if (!Validation.TryValidate(request, out var errors))
+                {
+                    return TypedResults.ValidationProblem(errors);
+                }
+
+                return store.Get(id) is { } order
+                    ? TypedResults.Ok<object>(new { orderId = order.Id, note = request.Text, addedAt = DateTimeOffset.UtcNow })
+                    : TypedResults.NotFound(Problems.NotFound("Order", id));
+            })
+            .WithName("AddOrderNote")
+            .WithSummary("Add a note to an order")
+            .WithDescription("Attaches a short free-text note to an order and echoes it back.");
 
         orders.MapGet("/{orderId:guid}/items", Results<Ok<IReadOnlyList<OrderItem>>, NotFound<ProblemDetails>> (Guid orderId) =>
                 store.Get(orderId) is { } order

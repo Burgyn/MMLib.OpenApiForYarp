@@ -12,11 +12,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\MMLib.OpenApiForYarp.Tests\TestFixtures\rich-api.openapi.json" Link="Fixtures\rich-api.openapi.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
-    <PackageReference Include="xunit.v3" />
+    <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
-    <PackageReference Include="Verify.XunitV3" />
+    <PackageReference Include="Verify.Xunit" />
     <PackageReference Include="Shouldly" />
   </ItemGroup>
 

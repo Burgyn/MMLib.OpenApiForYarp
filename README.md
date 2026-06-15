@@ -209,12 +209,26 @@ if (source.MergedDocument is { } merged) { /* ... */ }
 The repository uses [NUKE](https://nuke.build/):
 
 ```bash
-./build.sh Compile   # build
-./build.sh Test      # build + run all tests (net8.0 + net10.0)
-./build.sh Pack      # produce NuGet packages in ./artifacts
+./build.sh Compile        # build
+./build.sh Test           # build + run all tests (net8.0 + net10.0)
+./build.sh Pack           # produce NuGet packages in ./artifacts
+./build.sh MutationTest   # run Stryker.NET mutation testing on the core library
 ```
 
 CI (build + test) and publish (on push to `main`, publishing only when the version in `Directory.Build.props` changes) run via the generated GitHub Actions workflows.
+
+### Mutation testing
+
+[Stryker.NET](https://stryker-mutator.io/) is configured (`stryker-config.json`, local tool in
+`.config/dotnet-tools.json`). Run it directly with:
+
+```bash
+dotnet tool restore
+dotnet stryker            # mutates src/MMLib.OpenApiForYarp, runs the unit + integration tests
+```
+
+An HTML report is written to `StrykerOutput/`. Scope a run with e.g.
+`dotnet stryker --mutate "**/PathTransformation/*.cs"`.
 
 ## Known limitations (v1)
 
