@@ -21,7 +21,7 @@ public class OptionsBindingTests
                 "MergedDocument": { "Title": "My Gateway", "Version": "2.0" },
                 "Clusters": {
                   "products-cluster": { "Title": "Products API", "OpenApiPath": "/openapi/v1.json" },
-                  "orders-cluster": { "Title": "Orders API", "AddOnlyPublishedPaths": true }
+                  "orders-cluster": { "Title": "Orders API", "AddOnlyPublishedPaths": false }
                 }
               }
             }
@@ -32,8 +32,9 @@ public class OptionsBindingTests
         options.MergeDocuments.ShouldBeTrue();
         options.MergedDocument.Title.ShouldBe("My Gateway");
         options.Clusters.ShouldContainKey("products-cluster");
-        options.Clusters["orders-cluster"].AddOnlyPublishedPaths.ShouldBeTrue();
-        options.Clusters["products-cluster"].AddOnlyPublishedPaths.ShouldBeFalse();
+        // Explicit false overrides the default; products-cluster omits it and gets the default (true).
+        options.Clusters["orders-cluster"].AddOnlyPublishedPaths.ShouldBeFalse();
+        options.Clusters["products-cluster"].AddOnlyPublishedPaths.ShouldBeTrue();
     }
 
     [Fact]
@@ -45,6 +46,7 @@ public class OptionsBindingTests
         options.FetchTimeout.ShouldBe(TimeSpan.FromSeconds(30));
         options.MergeDocuments.ShouldBeFalse();
         new YarpOpenApiClusterOptions().OpenApiPath.ShouldBe("/openapi/v1.json");
+        new YarpOpenApiClusterOptions().AddOnlyPublishedPaths.ShouldBeTrue();
     }
 
     [Fact]

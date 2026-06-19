@@ -20,10 +20,11 @@ public sealed class YarpOpenApiClusterOptions
     public string OpenApiPath { get; set; } = "/openapi/v1.json";
 
     /// <summary>
-    /// When <see langword="true"/>, only paths that the gateway actually proxies (i.e. that match
-    /// a YARP route for this cluster) are kept in the aggregated document. Defaults to <see langword="false"/>.
+    /// When <see langword="true"/> (the default), only paths that the gateway actually proxies
+    /// (i.e. that match a YARP route for this cluster) are kept in the aggregated document. Set to
+    /// <see langword="false"/> to also include downstream paths that are not reachable through the gateway.
     /// </summary>
-    public bool AddOnlyPublishedPaths { get; set; }
+    public bool AddOnlyPublishedPaths { get; set; } = true;
 
     /// <summary>
     /// Optional regular expressions; when set, only gateway-facing paths matching at least one

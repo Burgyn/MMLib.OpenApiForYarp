@@ -161,7 +161,7 @@ The `YarpOpenApi` section (and the `YarpOpenApiOptions` object passed to the cod
 |---|---|---|---|
 | `Title` | `string?` | downstream / cluster id | Title shown in the UI for this service. |
 | `OpenApiPath` | `string` | `/openapi/v1.json` | Path on the downstream service serving its OpenAPI JSON. |
-| `AddOnlyPublishedPaths` | `bool` | `false` | Keep only paths the gateway actually proxies. |
+| `AddOnlyPublishedPaths` | `bool` | `true` | Keep only paths the gateway actually proxies. Set to `false` to include every downstream path. |
 | `IncludePaths` | `string[]?` | `null` | Regex patterns; keep only matching gateway paths. |
 | `ExcludePaths` | `string[]?` | `null` | Regex patterns; drop matching gateway paths. |
 | `SecurityScheme` | `string?` | `null` | Keep only this single named security scheme. |
@@ -183,7 +183,7 @@ The `YarpOpenApi` section (and the `YarpOpenApiOptions` object passed to the cod
 Set `MergeDocuments: true` to additionally serve `/openapi/all.json` combining every cluster; the merged `info` comes from `MergedDocument`. Components are unioned by name: **identically-shaped** schemas (e.g. a shared `Money` value object exposed by several services) merge silently into one. When two services define the **same name with different content**, the first is kept and a warning is logged — or, with `MergedDocument:RenameDuplicateSchemas: true`, the colliding schema is renamed (prefixed with its cluster) and that service's `$ref`s are rewritten, so the merged document stays correct for every service. Path conflicts always keep the first and warn.
 
 ### Published-paths filter & regex
-`AddOnlyPublishedPaths: true` drops any downstream path that isn't reachable through a YARP route. `IncludePaths` / `ExcludePaths` apply regular expressions to the rewritten gateway paths for finer control.
+By default (`AddOnlyPublishedPaths: true`) any downstream path that isn't reachable through a YARP route is dropped, so the aggregated document only shows what a client can actually call through the gateway. Set `AddOnlyPublishedPaths: false` to include every downstream path (unmatched paths keep their original downstream form). `IncludePaths` / `ExcludePaths` apply regular expressions to the rewritten gateway paths for finer control.
 
 ### Security propagation
 `securitySchemes` are propagated from each downstream document. Across services they are deduplicated by name (first wins, conflicts warned). Use the per-cluster `SecurityScheme` to keep only a specific scheme.
