@@ -1,4 +1,12 @@
+<img src="./assets/logo.png" alt="MMLib.OpenApiForYarp logo" width="300"/>
+
 # MMLib.OpenApiForYarp
+
+[![NuGet](https://img.shields.io/nuget/v/MMLib.OpenApiForYarp.svg?logo=nuget&label=NuGet)](https://www.nuget.org/packages/MMLib.OpenApiForYarp)
+[![Downloads](https://img.shields.io/nuget/dt/MMLib.OpenApiForYarp.svg?logo=nuget&label=Downloads)](https://www.nuget.org/packages/MMLib.OpenApiForYarp)
+[![Publish](https://github.com/Burgyn/MMLib.OpenApiForYarp/actions/workflows/publish.yml/badge.svg)](https://github.com/Burgyn/MMLib.OpenApiForYarp/actions/workflows/publish.yml)
+[![CI](https://github.com/Burgyn/MMLib.OpenApiForYarp/actions/workflows/ci.yml/badge.svg)](https://github.com/Burgyn/MMLib.OpenApiForYarp/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 **Aggregate the OpenAPI documentation of your downstream microservices onto a [YARP](https://microsoft.github.io/reverse-proxy/) gateway — and serve it through [Scalar](https://scalar.com/) or Swagger UI.**
 
