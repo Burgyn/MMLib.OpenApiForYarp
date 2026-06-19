@@ -24,8 +24,8 @@ using static Nuke.Common.Tools.DotNet.DotNetTasks;
     GitHubActionsImage.UbuntuLatest,
     OnPushBranches = new[] { "main" },
     InvokedTargets = new[] { nameof(Publish) },
-    ImportSecrets = new[] { nameof(NuGetApiKey) },
-    FetchDepth = 0)]
+    FetchDepth = 0,
+    AutoGenerate = false)]
 class Build : NukeBuild
 {
     public static int Main() => Execute<Build>(x => x.Compile);
@@ -95,16 +95,17 @@ class Build : NukeBuild
 
     Target Publish => _ => _
         .DependsOn(Pack)
-        .Requires(() => NuGetApiKey)
+        .Requires(() => IsServerBuild || NuGetApiKey != null)
         .OnlyWhenDynamic(() => !VersionExistsOnNuGet(PackageId, PackageVersion).GetAwaiter().GetResult())
         .Executes(() =>
         {
             Serilog.Log.Information("Publishing {PackageId} {Version}", PackageId, PackageVersion);
+            var apiKey = IsServerBuild ? "oidc" : NuGetApiKey;
             ArtifactsDirectory.GlobFiles("*.nupkg").ForEach(package =>
                 DotNetNuGetPush(s => s
                     .SetTargetPath(package)
                     .SetSource(NuGetSource)
-                    .SetApiKey(NuGetApiKey)
+                    .SetApiKey(apiKey)
                     .EnableSkipDuplicate()));
         });
 
