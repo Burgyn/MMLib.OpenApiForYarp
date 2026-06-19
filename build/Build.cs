@@ -95,17 +95,16 @@ class Build : NukeBuild
 
     Target Publish => _ => _
         .DependsOn(Pack)
-        .Requires(() => IsServerBuild || NuGetApiKey != null)
+        .Requires(() => NuGetApiKey)
         .OnlyWhenDynamic(() => !VersionExistsOnNuGet(PackageId, PackageVersion).GetAwaiter().GetResult())
         .Executes(() =>
         {
             Serilog.Log.Information("Publishing {PackageId} {Version}", PackageId, PackageVersion);
-            var apiKey = IsServerBuild ? "oidc" : NuGetApiKey;
             ArtifactsDirectory.GlobFiles("*.nupkg").ForEach(package =>
                 DotNetNuGetPush(s => s
                     .SetTargetPath(package)
                     .SetSource(NuGetSource)
-                    .SetApiKey(apiKey)
+                    .SetApiKey(NuGetApiKey)
                     .EnableSkipDuplicate()));
         });
 
