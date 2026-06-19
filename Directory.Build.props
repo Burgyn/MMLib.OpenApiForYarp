@@ -13,7 +13,7 @@
 
   <!-- Shared package/versioning metadata. Single SemVer source for packaging + the NUKE publish gate. -->
   <PropertyGroup>
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Authors>Milan Martiniak</Authors>
     <Company>Milan Martiniak</Company>
     <Product>MMLib.OpenApiForYarp</Product>
